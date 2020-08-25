@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import datetime
-import distutils.version
 import json
 import urllib.request
 
@@ -23,14 +21,8 @@ def versions():
     def make_name(version):
         return f"saltstack/salt:{version}"
 
-    return map(
-        make_name,
-        sorted(
-            filter(
-                SaltVersion._check_version,
-                map(distutils.version.LooseVersion, data["releases"]),
-            )
-        ),
+    return list(
+        map(make_name, sorted(filter(SaltVersion._check_version, data["releases"],)),)
     )
 
 

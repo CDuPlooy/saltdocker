@@ -24,7 +24,7 @@ class SaltVersion(object):
     _date = datetime.datetime.utcnow().strftime("%Y%m%d%H%M")
 
     def __init__(self, version):
-        self.version = version
+        self.version = distutils.version.LooseVersion(version)
 
     @property
     def shortversion(self):
@@ -90,7 +90,9 @@ class SaltVersion(object):
             await proc.communicate()
 
     @classmethod
-    def _check_version(cls, version):
+    def _check_version(cls, string_version):
+        version = distutils.version.LooseVersion(string_version)
+
         if version < MINVER or version in SKIP_VERSIONS:
             return False
         if [
@@ -107,12 +109,7 @@ class SaltVersion(object):
         async with aiohttp.ClientSession() as session:
             async with session.get("https://pypi.org/pypi/salt/json") as response:
                 cls.data = await response.json()
-        versions = sorted(
-            filter(
-                cls._check_version,
-                map(distutils.version.LooseVersion, cls.data["releases"]),
-            )
-        )
+        versions = sorted(filter(cls._check_version, cls.data["releases"]))
         if push is False:
             for idx, version in enumerate(versions):
                 if idx == 0:
